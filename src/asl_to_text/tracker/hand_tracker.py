@@ -3,12 +3,13 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from pprint import pprint
+from recorder import get_distance
 
 # 1. Configure HandLandmarker options
 base_options = python.BaseOptions(model_asset_path='src/asl_to_text/tracker/hand_landmarker.task')
 options = vision.HandLandmarkerOptions(
     base_options=base_options,
-    num_hands=2,
+    num_hands=1,
     min_hand_detection_confidence=0.5,
     min_tracking_confidence=0.5,
     running_mode=vision.RunningMode.IMAGE
@@ -27,6 +28,9 @@ HAND_CONNECTIONS = [
 ]
 
 cap = cv2.VideoCapture(0)
+
+averages = {}
+capture_count = 0
 
 while True:
     data, image = cap.read()
@@ -54,8 +58,24 @@ while True:
             pixel_landmarks = [
                 (int(lm.x * w), int(lm.y * h)) for lm in hand_landmarks
             ]
-            print("cords")
+            print("\n", "cords")
             pprint(pixel_landmarks)
+            capture_count += 1
+            
+            print("\n", "distances")
+            distances = get_distance(pixel_landmarks)
+            pprint(distances)
+            
+            if capture_count > 1 :
+                for data in distances :
+                    for x in range(len(distances[data])) :
+                        averages[f"a{data}"][x].append(distances[data][x])
+                
+            else :
+                for data in distances :
+                    averages[f"a{data}"] = []
+                    for dist in distances[data] :
+                        averages[f"a{data}"].append([dist])
 
             # Draw connection lines between landmarks
             for start_idx, end_idx in HAND_CONNECTIONS:
@@ -67,8 +87,10 @@ while True:
 
     cv2.imshow('Handtracker (Tasks API)', display_image)
     
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if (cv2.waitKey(1) & 0xFF == ord('q')) or capture_count == 20:
         break
+print("\n", "averages")
+print(averages)
 
 cap.release()
 cv2.destroyAllWindows()
