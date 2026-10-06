@@ -84,11 +84,30 @@ while True:
             # Draw landmark keypoints
             for cx, cy in pixel_landmarks:
                 cv2.circle(display_image, (cx, cy), 5, (0, 0, 255), -1)
+            
+            
+    status_text = f"Hands Detected: {capture_count}"
+    
+    # Optional dark background box for high readability
+    cv2.rectangle(display_image, (10, 10), (320, 60), (0, 0, 0), -1)
+    
+    # Render main text heading
+    cv2.putText(
+        display_image, 
+        status_text, 
+        (20, 45), 
+        cv2.FONT_HERSHEY_SIMPLEX, 
+        0.9, 
+        (0, 255, 255),  # Yellow text
+        2, 
+        cv2.LINE_AA
+    )
 
     cv2.imshow('Handtracker (Tasks API)', display_image)
     
     if (cv2.waitKey(1) & 0xFF == ord('q')) or capture_count == 20:
         break
+    
 print("\n", "averages")
 print(averages)
 

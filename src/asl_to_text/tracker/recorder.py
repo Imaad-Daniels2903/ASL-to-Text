@@ -26,7 +26,8 @@ def get_chunks(data : list, chunks : int, output : list = []) -> list :
     else :
         output.append(data[:chunks])
         return get_chunks(data[chunks:], chunks, output)
-    
+
+
 def main() :
     data = [1, 2, 3, 4, 5, 6, 7]
     print(get_chunks(data, 2))
